@@ -1,0 +1,23 @@
+{
+  "name": "roller-stats",
+  "version": "1.0.0",
+  "description": "RollerStats server functions",
+  "main": "index.js",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.119",
+    "@types/node": "^20.12.7",
+    "typescript": "^5.1.6"
+  },
+  "scripts": {
+    "lint": "eslint --ext .js,.ts,.tsx ./code/src/",
+    "build": "npx -p typescript tsc",
+    "cleanup": "rm -rf code/dist/*"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.552.0",
+    "@aws-sdk/client-s3": "^3.552.0",
+    "jwt-decode": "^4.0.0"
+  }
+}

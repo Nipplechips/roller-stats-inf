@@ -3,5 +3,5 @@ code/dist/**
 
 **.tfstate*
 **/.terraform/**
-
+terraform/.terraform.lock.hcl
 terraform/modules/lambda/*.zip
