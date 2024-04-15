@@ -9,6 +9,8 @@ module "userpool" {
 module "lambda" {
   source                      = "./modules/lambda"
   code_deployment_bucket_name = module.s3_assets.code_bucket_name
+  app_asset_bucket_name       = module.s3_assets.asset_bucket_name
+  app_asset_bucket_arn       = module.s3_assets.asset_bucket_arn
 
   depends_on = [
     module.s3_assets

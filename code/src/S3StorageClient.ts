@@ -1,4 +1,4 @@
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand, PutObjectCommandInput, S3Client } from "@aws-sdk/client-s3";
 import { IStorageClient } from "./common/aws/services/IStorageClient";
 
 
@@ -25,12 +25,13 @@ class AWSStorageClient implements IStorageClient {
         return JSON.parse(data, reviver);
     }
 
-    async writeFileData(fileName: string, fileData: string) {
+    async writeFileData(fileName: string, fileData: string, extras?:Partial<PutObjectCommandInput>) {
 
         const putObjectCommand: PutObjectCommand = new PutObjectCommand({
             Key: `${fileName}`,
             Bucket: this.bucketName,
-            Body: fileData
+            Body: fileData,
+            ...extras
         });
         return this.s3.send(putObjectCommand);
     }

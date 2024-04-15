@@ -4,6 +4,7 @@ import { jsonToMapReviver, mapToJsonReplacer } from "./util/utilities";
 import { IUserPoolClient } from "./aws/services/IUserPoolClient";
 import { AWSStorageClient } from "../S3StorageClient";
 import { CognitoUserPoolClient } from "../CognitoUserPoolClient";
+import { WFTDAStatbookConverter } from "../WFTDAStatbookConverter";
 
 type DevicePayload = {id: string, deviceToken: string, timestamp: number, address: string};
 
@@ -13,3 +14,5 @@ export {AWSStorageClient, CognitoUserPoolClient}
 
 export {apiResponse}
 export {jsonToMapReviver, mapToJsonReplacer}
+
+export {WFTDAStatbookConverter}

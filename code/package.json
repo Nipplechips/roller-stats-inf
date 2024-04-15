@@ -18,6 +18,9 @@
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.552.0",
     "@aws-sdk/client-s3": "^3.552.0",
-    "jwt-decode": "^4.0.0"
+    "jwt-decode": "^4.0.0",
+    "lodash": "^4.17.21",
+    "uuid": "^9.0.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
   }
 }
