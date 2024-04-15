@@ -36,7 +36,8 @@ export const s3Handler: S3Handler = async (event, context) => {
         }
     }
 
-    await Promise.all(conversionRequests);
+    
+    await Promise.all(conversionRequests).then((r) => console.debug("conversion completed", JSON.stringify(r)));
 };
 
 
