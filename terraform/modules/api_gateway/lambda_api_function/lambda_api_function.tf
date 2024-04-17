@@ -6,7 +6,8 @@ resource "aws_lambda_function" "lambda_function" {
   source_code_hash = var.source_code_hash
   role             = var.lambda_execution_role_arn
   runtime          = var.handler_config.runtime
-  timeout = 5
+  timeout          = var.handler_config.timeout
+  memory_size      = var.handler_config.memory_size 
   environment {
     variables = var.env_vars
   }
