@@ -19,7 +19,7 @@ variable "handler_config" {
     type = object({
         s3_bucket = string,
         s3_key = string
-        handler = optional(string, "test/handler")
+        handler = optional(string, "test/handler.handler")
         timeout = optional(number, 5)
         memory_size = optional(number, 128)
         runtime = optional(string, "nodejs16.x")

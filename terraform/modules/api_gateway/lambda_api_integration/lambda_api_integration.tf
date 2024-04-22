@@ -11,58 +11,58 @@ module "lambda_integration_fn" {
   env_vars = var.lambda_environment
 }
 
-# add options method to api
-resource "aws_api_gateway_method" "options" {
-  rest_api_id      = var.api_config.api_id
-  resource_id      = var.resource_id
-  http_method      = "OPTIONS"
-  authorization    = "NONE"
-  api_key_required = false
-}
-# OPTIONS method response.
-resource "aws_api_gateway_method_response" "options" {
-  rest_api_id      = var.api_config.api_id
-  resource_id      = var.resource_id
-  http_method = aws_api_gateway_method.options.http_method
-  status_code = "200"
-  response_models = {
-    "application/json" = "Empty"
-  }
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = true
-    "method.response.header.Access-Control-Allow-Methods" = true
-    "method.response.header.Access-Control-Allow-Origin"  = true
-  }
-}
+# # add options method to api
+# resource "aws_api_gateway_method" "options" {
+#   rest_api_id      = var.api_config.api_id
+#   resource_id      = var.resource_id
+#   http_method      = "OPTIONS"
+#   authorization    = "NONE"
+#   api_key_required = false
+# }
+# # OPTIONS method response.
+# resource "aws_api_gateway_method_response" "options" {
+#   rest_api_id      = var.api_config.api_id
+#   resource_id      = var.resource_id
+#   http_method = aws_api_gateway_method.options.http_method
+#   status_code = "200"
+#   response_models = {
+#     "application/json" = "Empty"
+#   }
+#   response_parameters = {
+#     "method.response.header.Access-Control-Allow-Headers" = true
+#     "method.response.header.Access-Control-Allow-Methods" = true
+#     "method.response.header.Access-Control-Allow-Origin"  = true
+#   }
+# }
 
-# OPTIONS integration.
-resource "aws_api_gateway_integration" "options" {
-  rest_api_id      = var.api_config.api_id
-  resource_id      = var.resource_id
-  http_method          = "OPTIONS"
-  type                 = "MOCK"
-  passthrough_behavior = "WHEN_NO_MATCH"
-  request_templates = {
-    "application/json" : "{\"statusCode\": 200}"
-  }
-}
+# # OPTIONS integration.
+# resource "aws_api_gateway_integration" "options" {
+#   rest_api_id      = var.api_config.api_id
+#   resource_id      = var.resource_id
+#   http_method          = "OPTIONS"
+#   type                 = "MOCK"
+#   passthrough_behavior = "WHEN_NO_MATCH"
+#   request_templates = {
+#     "application/json" : "{\"statusCode\": 200}"
+#   }
+# }
 
-# OPTIONS integration response.
-resource "aws_api_gateway_integration_response" "options" {
-  rest_api_id      = var.api_config.api_id
-  resource_id      = var.resource_id
-  http_method = aws_api_gateway_integration.options.http_method
-  status_code = "200"
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-    "method.response.header.Access-Control-Allow-Methods" = "'POST,OPTIONS'"
-    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
-  }
+# # OPTIONS integration response.
+# resource "aws_api_gateway_integration_response" "options" {
+#   rest_api_id      = var.api_config.api_id
+#   resource_id      = var.resource_id
+#   http_method = aws_api_gateway_integration.options.http_method
+#   status_code = "200"
+#   response_parameters = {
+#     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+#     "method.response.header.Access-Control-Allow-Methods" = "'POST,OPTIONS'"
+#     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+#   }
 
-  depends_on = [
-    aws_api_gateway_integration.options
-  ]
-}
+#   depends_on = [
+#     aws_api_gateway_integration.options
+#   ]
+# }
 
 # add method to api
 resource "aws_api_gateway_method" "rest_api_method"{

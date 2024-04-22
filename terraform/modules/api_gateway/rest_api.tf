@@ -10,6 +10,7 @@ resource "aws_api_gateway_deployment" "rest_api_deployment" {
       redeployment = sha1(jsonencode([
         aws_api_gateway_resource.rest_api_statbook_resource.id,
         module.lambda_get_statbooks.aws_api_gateway_method_id,
+        module.lambda_update_statbook_metadata.aws_api_gateway_method_id,
 
         aws_api_gateway_resource.rest_api_statbook_footage_resource.id,
         module.lambda_link_footage_with_statbook.aws_api_gateway_method_id,
@@ -72,6 +73,39 @@ module lambda_get_statbooks{
     s3_bucket = var.handler_code_bucket_name
     s3_key = var.handler_code_key
     handler = "statbook/get/handler.handler",
+    runtime = "nodejs16.x"    
+  }
+
+}
+
+module lambda_update_statbook_metadata{
+  source = "./lambda_api_integration"
+  name = "${var.api_name}_${var.rest_api_stage_name}_update-statbook-metadata"
+  lambda_execution_role_arn = var.lambda_execution_role_arn
+  resource_id = aws_api_gateway_resource.rest_api_statbook_resource.id
+
+  lambda_environment = {
+    asset_bucket_arn = var.asset_bucket_arn,
+    asset_bucket_name = var.asset_bucket_name
+  }
+  
+  auth_config = {
+    authorization = "COGNITO_USER_POOLS",
+    authorizer_id = aws_api_gateway_authorizer.api_authorizer.id
+  }
+
+  api_config = {
+    api_id = aws_api_gateway_rest_api.rest_api.id
+    api_resource = aws_api_gateway_resource.rest_api_statbook_resource
+    http_path = aws_api_gateway_resource.rest_api_statbook_resource.path
+    http_method = "PUT"
+  }
+
+  source_code_hash = var.source_code_hash
+  handler_config = {
+    s3_bucket = var.handler_code_bucket_name
+    s3_key = var.handler_code_key
+    handler = "statbook/put/handler.handler"
     runtime = "nodejs16.x"    
   }
 

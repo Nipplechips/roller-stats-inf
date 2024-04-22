@@ -10,8 +10,11 @@ export const handler: Handler = async (event, context) => {
     const tokenDecode: any = jwtDecode(event.headers.Authorization);
     console.log("JWT Token", tokenDecode);
 
+    console.log("Query params:", JSON.stringify(event.queryStringParameters));
+    console.log("Event body", JSON.parse(event.body));
+
     return  {
         statusCode: 200,
-        body: JSON.stringify('Welcome to Tile View ' + tokenDecode.email || tokenDecode.sub + "!"),
+        body: JSON.stringify('Welcome to the API'),
     };
 };
