@@ -15,10 +15,6 @@ export const handler: Handler = async (event, context) => {
     const storageClient = new AWSStorageClient(assetBucketName);
     const {statbookId, jamIndexes, jamMoments}: {statbookId: string, jamIndexes: any[], jamMoments: any[]} = JSON.parse(event.body);
 
-    if(jamIndexes.length + jamMoments.length < 1){
-        return apiResponse(undefined, "No metadata provided", 400);
-    }
-
     const result = await main({
         storage: storageClient,
         statbookStorageKey: statbookId,
