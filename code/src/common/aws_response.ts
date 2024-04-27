@@ -2,7 +2,9 @@ function apiResponse(data:any, err?: any, responseCode?: number){
     return {
 		statusCode: responseCode || 200,
 		headers: {
-			"Content-Type": "application/json",
+			"Access-Control-Allow-Headers" : "*",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "OPTIONS,POST,PUT,GET"
 		},
 		body: JSON.stringify( err || data)
 	};

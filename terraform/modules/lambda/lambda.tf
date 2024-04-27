@@ -38,6 +38,28 @@ resource "aws_iam_role" "lambda_execution_role" {
   })
 }
 
+# Role which allows API Gateway to write to CloudWatch logs
+resource "aws_api_gateway_account" "main" {
+  cloudwatch_role_arn = aws_iam_role.api_gateway_logging_role.arn
+}
+resource "aws_iam_role" "api_gateway_logging_role" {
+  name = "api-gateway-logs-role"
+  assume_role_policy = jsonencode({
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "apigateway.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+})
+
+}
+
 resource "aws_iam_policy" "policy" {
   name="roller-stats-lambda-execution-policy"
   description = "Policy required for cloud tasks"
@@ -69,6 +91,10 @@ resource "aws_iam_policy" "policy" {
   })
 }
 # ???
+resource "aws_iam_role_policy_attachment" "aws_api_gateway_logging_role_attachment" {
+  role=aws_iam_role.api_gateway_logging_role.name
+  policy_arn="arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+}
 resource "aws_iam_role_policy_attachment" "aws_lambda_basic_execution_role_attachment" {
   role=aws_iam_role.lambda_execution_role.name
   policy_arn=aws_iam_policy.policy.arn
