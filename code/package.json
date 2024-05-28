@@ -11,11 +11,14 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts,.tsx ./code/src/",
     "build": "npx -p typescript tsc",
-    "cleanup": "rm -rf code/dist/*"
+    "package": "mkdir -p dependencies/nodejs",
+    "cleanup": "rmdir nodejs /s /q && rmdir dist /s /q",
+    "localInvoke": ""
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-apigatewaymanagementapi": "^3.583.0",
     "@aws-sdk/client-cognito-identity-provider": "^3.552.0",
     "@aws-sdk/client-s3": "^3.552.0",
     "@aws-sdk/lib-storage": "^3.556.0",
