@@ -13,7 +13,7 @@ data "archive_file" "lambda_code" {
 data "archive_file" "node_modules" {
   type        = "zip"
   source_dir  = "../code/nodejs"
-  output_path = "${path.module}/nodejs.zip"
+  output_path = "${path.module}/dependencies.zip"
 
   depends_on = [null_resource.dummy_trigger, null_resource.node_modules_layer_packaging]
 }
@@ -22,7 +22,7 @@ resource "aws_lambda_layer_version" "node_modules" {
 	  layer_name       = "${module.global_settings.deployment_name_and_stage}-node_modules_layer"
 	  description      = "node_modules layer for application functions"
 	  s3_bucket        = var.code_deployment_bucket_name
-	  s3_key           = "nodejs.zip"
+	  s3_key           = "dependencies.zip"
 	  source_code_hash = data.archive_file.node_modules.output_base64sha256
 	
 	  compatible_runtimes = ["nodejs16.x"]
@@ -54,7 +54,7 @@ resource "null_resource" "node_modules_layer_packaging" {
 # Make an s3 object which is the node_modules dependencies zip
 resource "aws_s3_object" "node_modules" {
   bucket = var.code_deployment_bucket_name
-  key    = "nodejs.zip"
+  key    = "dependencies.zip"
   source = data.archive_file.node_modules.output_path
   etag   = filemd5(data.archive_file.node_modules.output_path)
 

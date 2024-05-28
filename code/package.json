@@ -11,7 +11,7 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts,.tsx ./code/src/",
     "build": "npx -p typescript tsc",
-    "package": "mkdir -p dependencies/nodejs",
+    "postbuild": "copy package*.json dependencies/nodejs && npm ci --production",
     "cleanup": "rmdir nodejs /s /q && rmdir dist /s /q",
     "localInvoke": ""
   },
