@@ -110,7 +110,7 @@ resource "aws_api_gateway_integration_response" "statbook_options_integration_re
 
 module lambda_get_statbooks{
   source = "./lambda_api_integration"
-  name = "${var.api_name}_${var.rest_api_stage_name}_get-statbooks"
+  name = "${var.api_name}_get-statbooks"
   lambda_execution_role_arn = var.lambda_execution_role_arn
   resource_id = aws_api_gateway_resource.rest_api_statbook_resource.id
 
@@ -142,7 +142,7 @@ module lambda_get_statbooks{
 
 module lambda_update_statbook_metadata{
   source = "./lambda_api_integration"
-  name = "${var.api_name}_${var.rest_api_stage_name}_update-statbook-metadata"
+  name = "${var.api_name}_update-statbook-metadata"
   lambda_execution_role_arn = var.lambda_execution_role_arn
   resource_id = aws_api_gateway_resource.rest_api_statbook_resource.id
 
@@ -238,7 +238,7 @@ resource "aws_api_gateway_integration_response" "statbook_footage_options_integr
 
 module lambda_link_footage_with_statbook{
   source = "./lambda_api_integration"
-  name = "${var.api_name}_${var.rest_api_stage_name}_link-footage-with-statbook"
+  name = "${var.api_name}_link-footage-with-statbook"
   lambda_execution_role_arn = var.lambda_execution_role_arn
   resource_id = aws_api_gateway_resource.rest_api_statbook_footage_resource.id
 
@@ -278,7 +278,7 @@ resource "aws_api_gateway_resource" "rest_api_storage_resource" {
 
 module lambda_get_storage_item_url{
   source = "./lambda_api_integration"
-  name = "${var.api_name}_${var.rest_api_stage_name}_get-storage-item-url"
+  name = "${var.api_name}_get-storage-item-url"
   lambda_execution_role_arn = var.lambda_execution_role_arn
   resource_id = aws_api_gateway_resource.rest_api_storage_resource.id
 

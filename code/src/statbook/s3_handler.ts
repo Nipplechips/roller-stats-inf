@@ -4,6 +4,8 @@ import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { main } from "./main";
 
 
+
+
 export const s3Handler: S3Handler = async (event, context) => {
     console.log("S3 Event Handler:")
     console.log({ event, context });

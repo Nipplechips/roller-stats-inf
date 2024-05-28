@@ -1,4 +1,3 @@
-# using archive_file data source to zip the lambda code
 module "global_settings" {
   source = "../global_constants"
 }
@@ -7,6 +6,62 @@ data "archive_file" "lambda_code" {
   type        = "zip"
   source_dir  = "../code/dist"
   output_path = "${path.module}/function_code.zip"
+
+  depends_on = [null_resource.dummy_trigger, null_resource.node_modules_layer_packaging]
+}
+
+data "archive_file" "node_modules" {
+  type        = "zip"
+  source_dir  = "../code/nodejs"
+  output_path = "${path.module}/nodejs.zip"
+
+  depends_on = [null_resource.dummy_trigger, null_resource.node_modules_layer_packaging]
+}
+
+resource "aws_lambda_layer_version" "node_modules" {
+	  layer_name       = "${module.global_settings.deployment_name_and_stage}-node_modules_layer"
+	  description      = "node_modules layer for application functions"
+	  s3_bucket        = var.code_deployment_bucket_name
+	  s3_key           = "nodejs.zip"
+	  source_code_hash = data.archive_file.node_modules.output_base64sha256
+	
+	  compatible_runtimes = ["nodejs16.x"]
+	  depends_on = [
+	    aws_s3_object.node_modules,
+	  ]
+}
+# Dummy resource to ensure archive is created at apply stage
+resource null_resource dummy_trigger {
+  triggers = {
+    timestamp = timestamp()
+  }
+}
+resource "null_resource" "node_modules_layer_packaging" {
+	  triggers = {
+	    updated_at = timestamp()
+	  }
+	
+
+	  provisioner "local-exec" {
+	    command = <<EOF
+	    npm run build
+	    EOF
+
+	    working_dir = "./"
+	  }
+}
+
+# Make an s3 object which is the node_modules dependencies zip
+resource "aws_s3_object" "node_modules" {
+  bucket = var.code_deployment_bucket_name
+  key    = "nodejs.zip"
+  source = data.archive_file.node_modules.output_path
+  etag   = filemd5(data.archive_file.node_modules.output_path)
+
+  depends_on = [
+    null_resource.node_modules_layer_packaging,
+    data.archive_file.node_modules
+  ]
 }
 
 # Make an s3 object which is the zipped code base
@@ -20,6 +75,7 @@ resource "aws_s3_object" "lambda_code" {
     data.archive_file.lambda_code
   ]
 }
+
 
 # role allowing lambda to assume roles
 resource "aws_iam_role" "lambda_execution_role" {
@@ -111,7 +167,6 @@ resource "aws_lambda_function" "convert_statbook_to_json_lambda_function" {
   timeout = 30
   memory_size = 256
 }
-
 resource "aws_lambda_permission" "allow_bucket" {
   statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
@@ -119,15 +174,12 @@ resource "aws_lambda_permission" "allow_bucket" {
   principal     = "s3.amazonaws.com"
   source_arn    = var.app_asset_bucket_arn
 }
-
 resource "aws_cloudwatch_log_group" "lambda_fn_log_group" {
   name              = "/aws/lambda/${aws_lambda_function.convert_statbook_to_json_lambda_function.function_name}"
   retention_in_days = 7
 }
-
 resource "null_resource" "wait_for_lambda_trigger" {
   depends_on   = [aws_lambda_permission.allow_bucket]
-
 }
 resource "aws_s3_bucket_notification" "xlsx_object_bucket_notification" {
   bucket = var.app_asset_bucket_name
@@ -143,4 +195,71 @@ resource "aws_s3_bucket_notification" "xlsx_object_bucket_notification" {
     aws_lambda_function.convert_statbook_to_json_lambda_function,
     aws_lambda_permission.allow_bucket
   ]
+}
+
+
+resource "aws_lambda_function" "connect" {
+  
+  function_name = "${module.global_settings.deployment_name_and_stage}-footagereview-connect"
+  s3_bucket        = var.code_deployment_bucket_name
+  s3_key           = aws_s3_object.lambda_code.key
+  source_code_hash = data.archive_file.lambda_code.output_base64sha256
+  handler       = "footage/connect/handler.handler"
+  layers = [aws_lambda_layer_version.node_modules.arn]
+  role             = aws_iam_role.lambda_execution_role.arn
+  runtime       = "nodejs16.x"
+  depends_on    = [aws_iam_role_policy_attachment.aws_lambda_basic_execution_role_attachment]
+}
+
+resource "aws_lambda_function" "SendMessage" {
+  function_name = "${module.global_settings.deployment_name_and_stage}-footagereview-sendmessage"
+  s3_bucket        = var.code_deployment_bucket_name
+  s3_key           = aws_s3_object.lambda_code.key
+  source_code_hash = data.archive_file.lambda_code.output_base64sha256
+  role             = aws_iam_role.lambda_execution_role.arn
+  handler       = "test/handler.handler"
+  runtime       = "nodejs16.x"
+  depends_on    = [aws_iam_role_policy_attachment.aws_lambda_basic_execution_role_attachment]
+}
+
+resource "aws_lambda_function" "disconnect" {
+  function_name = "${module.global_settings.deployment_name_and_stage}-footagereview-disconnect"
+  s3_bucket        = var.code_deployment_bucket_name
+  s3_key           = aws_s3_object.lambda_code.key
+  source_code_hash = data.archive_file.lambda_code.output_base64sha256
+  role             = aws_iam_role.lambda_execution_role.arn
+  handler       = "test/handler.handler"
+  runtime       = "nodejs16.x"
+  depends_on    = [aws_iam_role_policy_attachment.aws_lambda_basic_execution_role_attachment]
+}
+
+resource "aws_lambda_function" "Broadcast" {
+  function_name = "${module.global_settings.deployment_name_and_stage}-footagereview-broardcast"
+  s3_bucket        = var.code_deployment_bucket_name
+  s3_key           = aws_s3_object.lambda_code.key
+  source_code_hash = data.archive_file.lambda_code.output_base64sha256
+  role             = aws_iam_role.lambda_execution_role.arn
+  handler       = "test/handler.handler"
+  runtime       = "nodejs16.x"
+  depends_on    = [aws_iam_role_policy_attachment.aws_lambda_basic_execution_role_attachment]
+}
+
+resource "aws_cloudwatch_log_group" "connect_logs" {
+  name              = "/aws/lambda/${aws_lambda_function.connect.function_name}"
+  retention_in_days = 7
+}
+
+resource "aws_cloudwatch_log_group" "sendmessage_logs" {
+  name              = "/aws/lambda/${aws_lambda_function.SendMessage.function_name}"
+  retention_in_days = 7
+}
+
+resource "aws_cloudwatch_log_group" "disconnect_logs" {
+  name              = "/aws/lambda/${aws_lambda_function.disconnect.function_name}"
+  retention_in_days = 7
+}
+
+resource "aws_cloudwatch_log_group" "broadcast_logs" {
+  name              = "/aws/lambda/${aws_lambda_function.Broadcast.function_name}"
+  retention_in_days = 7
 }

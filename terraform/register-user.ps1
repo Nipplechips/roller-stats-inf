@@ -1,5 +1,5 @@
-$POOL_ID = "eu-west-1_PaU3VooNR"
-$CLIENT_ID = "1dh84sf5081qskgo3f9e0ghkoc"
+$POOL_ID = "eu-west-1_WcW3kR08r"
+$CLIENT_ID = "7568rr42q5v2lapj9rr87njs4m"
 $USER_NAME = "Testington"
 $NAME = "TestName"
 $PASSWORD = "P@55w0rd!23"

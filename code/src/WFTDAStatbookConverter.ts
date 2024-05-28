@@ -44,6 +44,12 @@ let template2018 = {
             "maxNum": 28
         }
     },
+    "summary": {
+        "sheetName": "Game Summary",
+        "maxRows": 20,
+        "home": {},
+        "away": {}
+    },
     "score": {
         "sheetName": "Score",
         "maxJams": 38,
@@ -1136,6 +1142,10 @@ class WFTDAStatbookConverter {
         }
 
     }
+
+    readGameSummary = (workbook: { Sheets: { [x: string]: any } }) => {
+        let sheet = workbook.Sheets[this.sbTemplate.summary.sheetName];
+    };
 
     readScores = (workbook: { Sheets: { [x: string]: any } }) => {
         // Given a workbook, extract the information from the score tab
@@ -2688,10 +2698,12 @@ class WFTDAStatbookConverter {
 // localInit();
 // function localInit() {
 //     console.log("Making reader")
-//     let data = fs.readFileSync("./code/statbook.xlsx")
+//     let data = fs.readFileSync("C:\\Users\\David\\source\\repos\\roller-stats\\roller-stats-inf\\code\\statbook.xlsx")
 //     data = new Uint8Array(data)
 //     const converter = new WFTDAStatbookConverter();
-//     converter.convertToJsonString(data);
+//     converter.convertToJson(data);
 // }
+
+
 
 export { WFTDAStatbookConverter }
