@@ -5,14 +5,14 @@
   "main": "index.js",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.119",
-    "@types/node": "^20.12.7",
+    "@types/node": "^20.12.12",
+    "shx": "^0.3.4",
     "typescript": "^5.1.6"
   },
   "scripts": {
     "lint": "eslint --ext .js,.ts,.tsx ./code/src/",
     "build": "npx -p typescript tsc",
-    "postbuild": "copy package*.json dependencies/nodejs && npm ci --production",
-    "cleanup": "rmdir nodejs /s /q && rmdir dist /s /q",
+    "postbuild": "shx cp package*.json dependencies/nodejs && cd ./dependencies/nodejs && npm i",
     "localInvoke": ""
   },
   "author": "",

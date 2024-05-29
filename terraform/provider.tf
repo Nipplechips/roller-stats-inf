@@ -11,12 +11,12 @@ terraform {
     }
   }
 
-   backend "s3" {
+  backend "s3" {
     profile = "drd_dev"
-    bucket         	   = "rollerstats-terraform-tfstate"
-    key              	 = "state/terraform.tfstate"
-    region         	   = "eu-west-1"
-    encrypt        	   = true
+    bucket  = "rollerstats-terraform-tfstate"
+    key     = "state/terraform.tfstate"
+    region  = "eu-west-1"
+    encrypt = true
   }
 
 }
@@ -28,8 +28,4 @@ module "global_settings" {
 provider "aws" {
   profile = "drd_dev"
   region  = module.global_settings.region
-}
-
-resource "aws_s3_bucket" "terraform_state" {
-  bucket = "${module.global_settings.deployment_name_and_stage}-terraform-state"
 }

@@ -5,14 +5,14 @@ module "global_settings" {
 data "archive_file" "lambda_code" {
   type        = "zip"
   source_dir  = "../code/dist"
-  output_path = "${path.module}/function_code.zip"
+  output_path = "${path.module}/${module.global_settings.lambda_builds_object_key}.zip"
 
   depends_on = [null_resource.dummy_trigger, null_resource.node_modules_layer_packaging]
 }
 
 data "archive_file" "node_modules" {
   type        = "zip"
-  source_dir  = "../code/nodejs"
+  source_dir  = "../code/dependencies"
   output_path = "${path.module}/dependencies.zip"
 
   depends_on = [null_resource.dummy_trigger, null_resource.node_modules_layer_packaging]
@@ -56,7 +56,7 @@ resource "aws_s3_object" "node_modules" {
   bucket = var.code_deployment_bucket_name
   key    = "dependencies.zip"
   source = data.archive_file.node_modules.output_path
-  etag   = filemd5(data.archive_file.node_modules.output_path)
+  etag   = data.archive_file.node_modules.output_md5
 
   depends_on = [
     null_resource.node_modules_layer_packaging,
@@ -67,9 +67,9 @@ resource "aws_s3_object" "node_modules" {
 # Make an s3 object which is the zipped code base
 resource "aws_s3_object" "lambda_code" {
   bucket = var.code_deployment_bucket_name
-  key    = "function_code.zip"
+  key    = "${module.global_settings.lambda_builds_object_key}.zip"
   source = data.archive_file.lambda_code.output_path
-  etag   = filemd5(data.archive_file.lambda_code.output_path)
+  etag   = data.archive_file.lambda_code.output_md5
 
   depends_on = [
     data.archive_file.lambda_code
@@ -196,6 +196,7 @@ resource "aws_s3_bucket_notification" "xlsx_object_bucket_notification" {
     aws_lambda_permission.allow_bucket
   ]
 }
+
 
 
 resource "aws_lambda_function" "connect" {

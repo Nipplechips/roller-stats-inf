@@ -20,6 +20,13 @@ variable "deployment_stage"{
 }
 
 # OUTPUT
+
+output "lambda_builds_bucket_name"{
+  value = "${var.deployment_name}-${var.deployment_stage}-lambda-builds"
+}
+output "lambda_builds_object_key" {
+  value = "function_code"
+}
 output "deployment_stage"{
     value = var.deployment_stage
 }

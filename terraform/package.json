@@ -5,9 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "cd ../code && npm run build",
-    "prebuild": "cd ../code && npm run cleanup",
-    "postbuild": "cd ../code && npm run package",
-    "deploy": "npm run build && terraform init && terraform apply --auto-approve",
+    "deploy": "terraform init && terraform apply --auto-approve",
     "init-auth": "aws cognito-idp initiate-auth --profile=tileview_dev --region=eu-west-1 --client-id=31jg63lafo8rqfdl9usoqeu36b --auth-flow USER_PASSWORD_AUTH --auth-parameters USERNAME=test,PASSWORD=P@55w0rd!23 --output json"
   },
   "keywords": [],

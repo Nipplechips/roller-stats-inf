@@ -1,9 +1,9 @@
 output "rest_api_url" {
-  value = module.api_gateway.rest_api_url
+  value = module.api_gatewayv2.rest_api_url
 }
 
 output "rest_api_id" {
-  value = module.api_gateway.rest_api_id
+  value = module.api_gatewayv2.rest_api_id
 }
 
 output "user_pool_id" {

@@ -1,3 +1,6 @@
+module "global_constants_s3" {
+  source = "../global_constants"  
+}
 
 # Bucket for application to store/retrieve assets
 resource "aws_s3_bucket" "asset_bucket" {
@@ -31,7 +34,7 @@ resource "aws_s3_bucket_acl" "lambda_bucket_acl" {
 
 # An s3 bucket to store code assets in
 resource "aws_s3_bucket" "code_deploy_bucket" {
-  bucket = var.s3_code_deployment_bucket_name
+  bucket = module.global_constants_s3.lambda_builds_bucket_name
 }
 
 # making the s3 bucket private as it houses the lambda code

@@ -11,8 +11,10 @@ output "handler_code_key" {
 }
 
 output "node_modules_layer_arn"{
-  value = aws_lambda_layer_version.node_modules
+  value = aws_lambda_layer_version.node_modules.arn
 }
+
+
 
 output "connect_lambda_arn" {
   value = aws_lambda_function.connect.invoke_arn
