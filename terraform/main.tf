@@ -1,32 +1,38 @@
+module "global_settings_main" {
+  source = "./modules/global_constants"
+}
 module "s3_assets" {
-  source = "./modules/s3"
+  source                         = "./modules/s3"
+  s3_code_deployment_bucket_name = module.global_settings_main.lambda_builds_bucket_name
+  s3_assets_bucket_name          = module.global_settings_main.application_assets_bucket_name
+
 }
 
 module "userpool" {
   source = "./modules/cognito"
 }
 
-module "lambda" {
-  source                      = "./modules/lambda"
-  code_deployment_bucket_name = module.s3_assets.code_bucket_name
-  app_asset_bucket_name       = module.s3_assets.asset_bucket_name
-  app_asset_bucket_arn        = module.s3_assets.asset_bucket_arn
+# module "lambda" {
+#   source                      = "./modules/lambda"
+#   code_deployment_bucket_name = module.s3_assets.code_bucket_name
+#   app_asset_bucket_name       = module.s3_assets.asset_bucket_name
+#   app_asset_bucket_arn        = module.s3_assets.asset_bucket_arn
 
-  depends_on = [
-    module.s3_assets
-  ]
-}
+#   depends_on = [
+#     module.s3_assets
+#   ]
+# }
 
 module "api_gatewayv2" {
   source = "./modules/api"
 
   userpool_client_id        = module.userpool.app_client_id
   userpool_endpoint         = module.userpool.userpool_endpoint
-  lambda_execution_role_arn = module.lambda.lambda_execution_role_arn
-  node_modules_layer_arn = module.lambda.node_modules_layer_arn
-  source_code_hash = module.lambda.source_code_hash
+  lambda_execution_role_arn = "module.lambda.lambda_execution_role_arn"
+  node_modules_layer_arn    = "module.lambda.node_modules_layer_arn"
+  source_code_hash          = "module.lambda.source_code_hash"
 
-  depends_on = [module.userpool, module.lambda]
+  depends_on = [module.userpool]
 
 }
 # module "api_gateway" {

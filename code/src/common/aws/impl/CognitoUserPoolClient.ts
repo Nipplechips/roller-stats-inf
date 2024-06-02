@@ -1,6 +1,6 @@
 
 import { AdminGetUserCommand, CognitoIdentityProviderClient } from "@aws-sdk/client-cognito-identity-provider";
-import { IUserPoolClient } from "./common/aws/services/IUserPoolClient";
+import { IUserPoolClient } from "../services/IUserPoolClient";
 
 const client = new CognitoIdentityProviderClient({ region: "REGION" });
 class CognitoUserPoolClient implements IUserPoolClient {

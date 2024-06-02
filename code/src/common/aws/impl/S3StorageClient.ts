@@ -1,5 +1,5 @@
 import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, PutObjectCommandInput, S3Client } from "@aws-sdk/client-s3";
-import { IStorageClient, StorageFileData } from "./common/aws/services/IStorageClient";
+import { IStorageClient, StorageFileData } from "../services/IStorageClient";
 import { Upload } from "@aws-sdk/lib-storage";
 import {
     getSignedUrl,

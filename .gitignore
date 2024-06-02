@@ -7,3 +7,4 @@ code/dependencies/**
 terraform/.terraform.lock.hcl
 terraform/modules/lambda/*.zip
 **/*.xlsx
+builds

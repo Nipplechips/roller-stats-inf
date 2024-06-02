@@ -2,58 +2,23 @@ module "global_settings_apiv2"{
     source = "../global_constants"
 }
 
-resource "aws_lambda_function" "get_statbooks" {
-  
-  function_name = "${module.global_settings_apiv2.deployment_name_and_stage}-get-statbooks"
-  s3_bucket        = module.global_settings_apiv2.lambda_builds_bucket_name
-  s3_key           = module.global_settings_apiv2.lambda_builds_object_key
-  source_code_hash = var.source_code_hash
-  handler       = "statbook/get/handler.handler"
-layers = [var.node_modules_layer_arn]
-  role             = var.lambda_execution_role_arn
-  runtime       = "nodejs16.x"
-  
-}
-resource "aws_cloudwatch_log_group" "get_statbooks_logs" {
-  name              = "/aws/lambda/${aws_lambda_function.get_statbooks.function_name}"
-  retention_in_days = 7
+
+module "lambda_layer_node_modules" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  create_layer = true
+
+  layer_name          = "${module.global_settings_apiv2.deployment_name_and_stage}-node_modules_layer"
+  description         = "node_modules layer for application functions"
+  compatible_runtimes = ["nodejs16.x"]
+
+  source_path = "../code/dependencies"
+
+  store_on_s3 = true
+  s3_bucket   = module.global_settings_apiv2.lambda_builds_bucket_name
 }
 
-resource "aws_lambda_function" "update_statbook_metadata" {
-  
-  function_name = "${module.global_settings_apiv2.deployment_name_and_stage}-update-statbook-metadata"
-  s3_bucket        = module.global_settings_apiv2.lambda_builds_bucket_name
-  s3_key           = module.global_settings_apiv2.lambda_builds_object_key
-  source_code_hash = var.source_code_hash
-  handler       = "statbook/put/handler.handler"
-layers = [var.node_modules_layer_arn]
-  role             = var.lambda_execution_role_arn
-  runtime       = "nodejs16.x"
-}
-resource "aws_cloudwatch_log_group" "update_statbook_metadata" {
-  name              = "/aws/lambda/${aws_lambda_function.update_statbook_metadata.function_name}"
-  retention_in_days = 7
-}
-
-
-resource "aws_lambda_function" "link_footage_with_statbook" {
-  
-  function_name = "${module.global_settings_apiv2.deployment_name_and_stage}-link-footage-with-statbook"
-  s3_bucket        = module.global_settings_apiv2.lambda_builds_bucket_name
-  s3_key           = module.global_settings_apiv2.lambda_builds_object_key
-  source_code_hash = var.source_code_hash
-  handler       = "statbook/footage/put/handler.handler"
-  layers = [var.node_modules_layer_arn]
-  role             = var.lambda_execution_role_arn
-  runtime       = "nodejs16.x"
-}
-resource "aws_cloudwatch_log_group" "link_footage_with_statbook" {
-  name              = "/aws/lambda/${aws_lambda_function.link_footage_with_statbook.function_name}"
-  retention_in_days = 7
-}
-
-
-module "api_gateway" {
+ module "api_gateway" {
   source = "terraform-aws-modules/apigateway-v2/aws"
 
   name          = "${module.global_settings_apiv2.deployment_name_and_stage}"
@@ -72,37 +37,33 @@ module "api_gateway" {
   # domain_name_certificate_arn = "arn:aws:acm:eu-west-1:052235179155:certificate/2b3a7ed9-05e1-4f9e-952b-27744ba06da6"
 
   # Access logs
-  # default_stage_access_log_destination_arn = "arn:aws:logs:eu-west-1:835367859851:log-group:debug-apigateway"
-  # default_stage_access_log_format          = "$context.identity.sourceIp - - [$context.requestTime] \"$context.httpMethod $context.routeKey $context.protocol\" $context.status $context.responseLength $context.requestId $context.integrationErrorMessage"
+  create_default_stage_access_log_group = true
+  default_stage_access_log_group_retention_in_days = 7
+  default_stage_access_log_format          = "$context.identity.sourceIp - - [$context.requestTime] \"$context.httpMethod $context.routeKey $context.protocol\" $context.status $context.responseLength $context.requestId $context.integrationErrorMessage"
 
   # Routes and integrations
   integrations = {
       "POST /statbook/footage" = {
-      lambda_arn             = aws_lambda_function.link_footage_with_statbook.arn
+      lambda_arn             = module.link_footage_with_statbook.lambda_function_arn
       payload_format_version = "2.0"
-      timeout_milliseconds   = 12000
-      authorizer_key = "cognito"
-      authorizer_type = "JWT"  
     }
 
     "POST /statbook" = {
-      lambda_arn             = aws_lambda_function.update_statbook_metadata.arn
+      lambda_arn             = module.update_statbook_metadata.lambda_function_arn
       payload_format_version = "2.0"
-      timeout_milliseconds   = 12000
-      authorizer_key = "cognito"
-      authorizer_type = "JWT"  
     }
 
     "GET /statbook" = {
-      integration_type = "HTTP_PROXY"
-      lambda_arn = aws_lambda_function.get_statbooks.arn
+      lambda_arn = module.lambda_function_get_statbooks.lambda_function_arn
+      detailed_metrics_enabled = true
       authorizer_key = "cognito"
+      authorization_type = "JWT"
       authorizer_type = "JWT"      
     }
 
-    "$default" = {
-      lambda_arn = "arn:aws:lambda:eu-west-1:052235179155:function:my-default-function"
-    }
+    # "$default" = {
+    #   lambda_arn = module.lambda_function_get_statbooks.lambda_function_arn
+    # }
   }
 
   authorizers = {
@@ -115,7 +76,134 @@ module "api_gateway" {
     }
   }
 
-  tags = {
-    Name = "http-apigateway"
+}
+
+resource "aws_iam_policy" "lambda_execution_policy" {
+  name="roller-stats-lambda-execution-policy"
+  description = "Policy required for cloud tasks"
+  policy =  jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:*"
+            ],
+            "Resource": "arn:aws:logs:*:*:*"
+        },
+      {
+        Action = [
+          "cognito-idp:AdminGetUser",
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+      {
+        Action = [
+          "s3:*",
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+    ]
+  })
+}
+
+module "lambda_function_get_statbooks" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name = "${module.global_settings_apiv2.deployment_name_and_stage}-get-statbooks"
+  s3_bucket        = module.global_settings_apiv2.lambda_builds_bucket_name
+  handler       = "statbook/get/handler.handler"
+  runtime       = "nodejs16.x"
+
+  source_path = "../code/dist"
+
+  store_on_s3 = true
+  publish = true
+  layers = [
+    module.lambda_layer_node_modules.lambda_layer_arn,
+  ]
+
+  attach_policy = true
+  policy = aws_iam_policy.lambda_execution_policy.arn
+
+  cloudwatch_logs_retention_in_days = 7
+
+  allowed_triggers = {
+    AllowExecutionFromAPIGateway = {
+      service    = "apigateway"
+      source_arn = "${module.api_gateway.apigatewayv2_api_execution_arn}/*/*"
+    }
+  }
+
+  environment_variables = {
+    asset_bucket_name = "${module.global_settings_apiv2.application_assets_bucket_name}"
+  }
+}
+
+module "update_statbook_metadata" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name = "${module.global_settings_apiv2.deployment_name_and_stage}-update-statbook-metadata"
+  s3_bucket        = module.global_settings_apiv2.lambda_builds_bucket_name
+  handler       = "statbook/put/handler.handler"
+  runtime       = "nodejs16.x"
+
+  source_path = "../code/dist"
+
+  store_on_s3 = true
+  publish = true
+  layers = [
+    module.lambda_layer_node_modules.lambda_layer_arn,
+  ]
+
+  attach_policy = true
+  policy = aws_iam_policy.lambda_execution_policy.arn
+
+  cloudwatch_logs_retention_in_days = 7
+
+  allowed_triggers = {
+    AllowExecutionFromAPIGateway = {
+      service    = "apigateway"
+      source_arn = "${module.api_gateway.apigatewayv2_api_execution_arn}/*/*"
+    }
+  }
+
+  environment_variables = {
+    asset_bucket_name = "${module.global_settings_apiv2.application_assets_bucket_name}"
+  }
+}
+
+module "link_footage_with_statbook" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name = "${module.global_settings_apiv2.deployment_name_and_stage}-link-footage-with-statbook"
+  s3_bucket        = module.global_settings_apiv2.lambda_builds_bucket_name
+  handler       = "statbook/footage/put/handler.handler"
+  runtime       = "nodejs16.x"
+
+  source_path = "../code/dist"
+
+  store_on_s3 = true
+  publish = true
+  layers = [
+    module.lambda_layer_node_modules.lambda_layer_arn,
+  ]
+
+  attach_policy = true
+  policy = aws_iam_policy.lambda_execution_policy.arn
+
+  cloudwatch_logs_retention_in_days = 7
+
+  allowed_triggers = {
+    AllowExecutionFromAPIGateway = {
+      service    = "apigateway"
+      source_arn = "${module.api_gateway.apigatewayv2_api_execution_arn}/*/*"
+    }
+  }
+
+  environment_variables = {
+    asset_bucket_name = "${module.global_settings_apiv2.application_assets_bucket_name}"
   }
 }

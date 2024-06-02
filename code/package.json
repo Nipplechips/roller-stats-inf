@@ -12,7 +12,7 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts,.tsx ./code/src/",
     "build": "npx -p typescript tsc",
-    "postbuild": "shx cp package*.json dependencies/nodejs && cd ./dependencies/nodejs && npm i",
+    "postbuild": "shx cp package*.json dependencies/nodejs && cd ./dependencies/nodejs && npm i --omit=dev",
     "localInvoke": ""
   },
   "author": "",

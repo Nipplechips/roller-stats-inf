@@ -24,8 +24,11 @@ variable "deployment_stage"{
 output "lambda_builds_bucket_name"{
   value = "${var.deployment_name}-${var.deployment_stage}-lambda-builds"
 }
+output "application_assets_bucket_name"{
+  value = "${var.deployment_name}-${var.deployment_stage}-assets"
+}
 output "lambda_builds_object_key" {
-  value = "function_code"
+  value = "function_code.zip"
 }
 output "deployment_stage"{
     value = var.deployment_stage

@@ -5,7 +5,7 @@ module "global_settings" {
 data "archive_file" "lambda_code" {
   type        = "zip"
   source_dir  = "../code/dist"
-  output_path = "${path.module}/${module.global_settings.lambda_builds_object_key}.zip"
+  output_path = "${path.module}/${module.global_settings.lambda_builds_object_key}"
 
   depends_on = [null_resource.dummy_trigger, null_resource.node_modules_layer_packaging]
 }
@@ -44,7 +44,7 @@ resource "null_resource" "node_modules_layer_packaging" {
 
 	  provisioner "local-exec" {
 	    command = <<EOF
-	    npm run build
+	    
 	    EOF
 
 	    working_dir = "./"
@@ -67,7 +67,7 @@ resource "aws_s3_object" "node_modules" {
 # Make an s3 object which is the zipped code base
 resource "aws_s3_object" "lambda_code" {
   bucket = var.code_deployment_bucket_name
-  key    = "${module.global_settings.lambda_builds_object_key}.zip"
+  key    = "${module.global_settings.lambda_builds_object_key}"
   source = data.archive_file.lambda_code.output_path
   etag   = data.archive_file.lambda_code.output_md5
 
@@ -168,7 +168,7 @@ resource "aws_lambda_function" "convert_statbook_to_json_lambda_function" {
   memory_size = 256
 }
 resource "aws_lambda_permission" "allow_bucket" {
-  statement_id  = "AllowExecutionFromS3Bucket"
+  statement_id  = "${aws_lambda_function.convert_statbook_to_json_lambda_function.function_name}-AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.convert_statbook_to_json_lambda_function.arn
   principal     = "s3.amazonaws.com"
@@ -196,8 +196,6 @@ resource "aws_s3_bucket_notification" "xlsx_object_bucket_notification" {
     aws_lambda_permission.allow_bucket
   ]
 }
-
-
 
 resource "aws_lambda_function" "connect" {
   
