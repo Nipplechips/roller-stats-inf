@@ -2,22 +2,6 @@ module "global_settings_apiv2"{
     source = "../global_constants"
 }
 
-
-module "lambda_layer_node_modules" {
-  source = "terraform-aws-modules/lambda/aws"
-
-  create_layer = true
-
-  layer_name          = "${module.global_settings_apiv2.deployment_name_and_stage}-node_modules_layer"
-  description         = "node_modules layer for application functions"
-  compatible_runtimes = ["nodejs16.x"]
-
-  source_path = "../code/dependencies"
-
-  store_on_s3 = true
-  s3_bucket   = module.global_settings_apiv2.lambda_builds_bucket_name
-}
-
  module "api_gateway" {
   source = "terraform-aws-modules/apigateway-v2/aws"
 
@@ -79,7 +63,7 @@ module "lambda_layer_node_modules" {
 }
 
 resource "aws_iam_policy" "lambda_execution_policy" {
-  name="roller-stats-lambda-execution-policy"
+  name="roller-stats-api-lambda-execution-policy"
   description = "Policy required for cloud tasks"
   policy =  jsonencode({
     Version = "2012-10-17"
@@ -122,7 +106,7 @@ module "lambda_function_get_statbooks" {
   store_on_s3 = true
   publish = true
   layers = [
-    module.lambda_layer_node_modules.lambda_layer_arn,
+    var.node_modules_layer_arn,
   ]
 
   attach_policy = true
@@ -155,7 +139,7 @@ module "update_statbook_metadata" {
   store_on_s3 = true
   publish = true
   layers = [
-    module.lambda_layer_node_modules.lambda_layer_arn,
+    var.node_modules_layer_arn,
   ]
 
   attach_policy = true
@@ -182,13 +166,15 @@ module "link_footage_with_statbook" {
   s3_bucket        = module.global_settings_apiv2.lambda_builds_bucket_name
   handler       = "statbook/footage/put/handler.handler"
   runtime       = "nodejs16.x"
+  timeout = 180
+  memory_size = 512
 
   source_path = "../code/dist"
 
   store_on_s3 = true
   publish = true
   layers = [
-    module.lambda_layer_node_modules.lambda_layer_arn,
+    var.node_modules_layer_arn,
   ]
 
   attach_policy = true
