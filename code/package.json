@@ -12,7 +12,6 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts,.tsx ./code/src/",
     "build": "npx -p typescript tsc",
-    "postbuild": "shx cp -rf node_modules dependencies/nodejs",
     "localInvoke": ""
   },
   "author": "",

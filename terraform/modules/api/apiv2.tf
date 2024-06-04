@@ -89,6 +89,13 @@ resource "aws_iam_policy" "lambda_execution_policy" {
         Effect   = "Allow"
         Resource = "*"
       },
+       {
+            "Effect": "Allow",
+            "Action": [
+                "execute-api:ManageConnections"
+            ],
+            "Resource": "arn:aws:execute-api:eu-west-1:730335293816:xo75rwpe9i/*"
+        },
     ]
   })
 }
@@ -99,7 +106,7 @@ module "lambda_function_get_statbooks" {
   function_name = "${module.global_settings_apiv2.deployment_name_and_stage}-get-statbooks"
   s3_bucket        = module.global_settings_apiv2.lambda_builds_bucket_name
   handler       = "statbook/get/handler.handler"
-  runtime       = "nodejs16.x"
+  runtime = module.global_settings_apiv2.default_lambda_runtime
 
   source_path = "../code/dist"
 
@@ -132,7 +139,7 @@ module "update_statbook_metadata" {
   function_name = "${module.global_settings_apiv2.deployment_name_and_stage}-update-statbook-metadata"
   s3_bucket        = module.global_settings_apiv2.lambda_builds_bucket_name
   handler       = "statbook/put/handler.handler"
-  runtime       = "nodejs16.x"
+  runtime = module.global_settings_apiv2.default_lambda_runtime
 
   source_path = "../code/dist"
 
@@ -165,7 +172,7 @@ module "link_footage_with_statbook" {
   function_name = "${module.global_settings_apiv2.deployment_name_and_stage}-link-footage-with-statbook"
   s3_bucket        = module.global_settings_apiv2.lambda_builds_bucket_name
   handler       = "statbook/footage/put/handler.handler"
-  runtime       = "nodejs16.x"
+  runtime = module.global_settings_apiv2.default_lambda_runtime
   timeout = 180
   memory_size = 512
 

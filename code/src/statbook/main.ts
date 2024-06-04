@@ -1,4 +1,5 @@
-import { IStorageClient, WFTDAStatbookConverter } from "../common";
+import { WFTDAStatbookConverter } from "../WFTDAStatbookConverter";
+import { IStorageClient } from "../common";
 type DerbyJson = any;
 export async function main({ converter, storage, workbookData }: { workbookData: Uint8Array, storage: IStorageClient, converter: WFTDAStatbookConverter; }): Promise<DerbyJson> {
 

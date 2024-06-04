@@ -22,6 +22,7 @@ resource "aws_iam_policy" "lambda_execution_policy" {
         Effect   = "Allow"
         Resource = "*"
       },
+     
     ]
   })
 }
@@ -33,9 +34,14 @@ module "lambda_layer_node_modules" {
 
   layer_name          = "${module.global_settings.deployment_name_and_stage}-node_modules_layer"
   description         = "node_modules layer for application functions"
-  compatible_runtimes = ["nodejs16.x"]
+  compatible_runtimes = [module.global_settings.default_lambda_runtime]
 
-  source_path = "../code/dependencies"
+  source_path = [
+    {
+      path : "../code/node_modules"
+      prefix_in_zip = "nodejs/node_modules"
+    }
+  ]
 
   store_on_s3 = true
   s3_bucket   = module.global_settings.lambda_builds_bucket_name
@@ -47,7 +53,7 @@ module "convert_statbook_to_json_lambda_function" {
   function_name = "${module.global_settings.deployment_name_and_stage}-convert-statbook-to-json"
   s3_bucket        = module.global_settings.lambda_builds_bucket_name
   handler       = "statbook/s3_handler.s3Handler"
-  runtime       = "nodejs16.x"
+  runtime       = module.global_settings.default_lambda_runtime
   timeout = 30
   memory_size = 256
 

@@ -24,8 +24,16 @@ variable "dynamodb_chat_table_name" {
   default = "chat-rooms"
 }
 
+variable "default_lambda_runtime" {
+  type = string
+  default = "nodejs20.x"
+}
+
 # OUTPUT
 
+output "default_lambda_runtime"{
+  value = var.default_lambda_runtime
+}
 output "dynamodb_chat_table_name"{
   value = "${var.deployment_name}-${var.deployment_stage}-${var.dynamodb_chat_table_name}"
 }

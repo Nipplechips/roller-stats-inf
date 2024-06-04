@@ -4,7 +4,6 @@ import { jsonToMapReviver, mapToJsonReplacer } from "./util/utilities";
 import { IUserPoolClient } from "./aws/services/IUserPoolClient";
 import { AWSStorageClient } from "./aws/impl/S3StorageClient";
 import { CognitoUserPoolClient } from "./aws/impl/CognitoUserPoolClient";
-import { WFTDAStatbookConverter } from "../WFTDAStatbookConverter";
 import { IDynamoDbClient } from "./aws/services/IDynamoDbClient";
 import { AWSDynamoDbClient } from "./aws/impl/AWSDynamoDbClient";
 
@@ -17,4 +16,4 @@ export {AWSStorageClient, CognitoUserPoolClient, AWSDynamoDbClient}
 export {apiResponse}
 export {jsonToMapReviver, mapToJsonReplacer}
 
-export {WFTDAStatbookConverter}
+

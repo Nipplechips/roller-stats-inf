@@ -1,7 +1,8 @@
 import { S3EventRecord, S3Handler } from "aws-lambda";
-import { AWSStorageClient, WFTDAStatbookConverter } from "../common";
+import { AWSStorageClient } from "../common";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { main } from "./main";
+import { WFTDAStatbookConverter } from "../WFTDAStatbookConverter";
 
 
 
