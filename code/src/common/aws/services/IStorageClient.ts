@@ -9,6 +9,7 @@ interface IStorageClient {
     listKeys(prefix?: string, suffix?: string, keyList?: string[], pageToken?: string): Promise<string[]>;
     getObject(key: string): Promise<string | undefined>
     getObjects(prefix?: string, suffix?: string): Promise<({key: string, contents: string})[]> ;
+    checkObjectExists(key: string): Promise<boolean>;
 }
 
 export { IStorageClient, StorageFileData }

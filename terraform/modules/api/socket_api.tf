@@ -83,6 +83,20 @@ module "lambda_function_socket_send_message" {
   attach_policy = true
   policy = aws_iam_policy.lambda_socket_execution_policy.arn
 
+  attach_policy_statements = true
+  policy_statements = {
+    s3_read = {
+      effect    = "Allow",
+      actions   = ["s3:HeadObject", "s3:GetObject"],
+      resources = ["arn:aws:s3:::${module.global_settings_socket_api.application_assets_bucket_name}/*"]
+    },
+     dynamo_put = {
+      effect    = "Allow",
+      actions   = ["dynamodb:PutItem"],
+      resources = ["${var.db_table_arn}"]
+    }
+  }
+
   cloudwatch_logs_retention_in_days = 7
 
   # allowed_triggers = {
@@ -92,9 +106,10 @@ module "lambda_function_socket_send_message" {
   #   }
   # }
 
-  # environment_variables = {
-  #   asset_bucket_name = "${module.global_settings_apiv2.application_assets_bucket_name}"
-  # }
+  environment_variables = {
+    asset_bucket_name = "${module.global_settings_socket_api.application_assets_bucket_name}"
+    table_name = "${var.db_table_name}"
+  }
 }
 
 module "lambda_function_socket_disconnect" {

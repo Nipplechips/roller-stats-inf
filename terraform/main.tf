@@ -23,17 +23,20 @@ module "lambda" {
   ]
 }
 
+module "dynamodb" {
+  source = "./modules/dynamodb"
+}
+
 module "api_gatewayv2" {
   source = "./modules/api"
 
   userpool_client_id     = module.userpool.app_client_id
   userpool_endpoint      = module.userpool.userpool_endpoint
   node_modules_layer_arn = module.lambda.node_modules_layer_arn
-
+  db_table_name = module.dynamodb.table_name
+  db_table_arn = module.dynamodb.table_arn
   depends_on = [module.userpool, module.lambda]
 
 }
 
-module "dynamodb" {
-  source = "./modules/dynamodb"
-}
+

@@ -11,6 +11,8 @@ module "dynamodb_table" {
   table_class                 = "STANDARD_INFREQUENT_ACCESS"
   deletion_protection_enabled = false
 
+  ttl_attribute_name = "ttl"
+  ttl_enabled = true
   attributes = [
     {
       name = "pk"

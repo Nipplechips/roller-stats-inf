@@ -1,4 +1,4 @@
-import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, PutObjectCommandInput, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, HeadObjectCommand, ListObjectsV2Command, PutObjectCommand, PutObjectCommandInput, S3Client } from "@aws-sdk/client-s3";
 import { IStorageClient, StorageFileData } from "../services/IStorageClient";
 import { Upload } from "@aws-sdk/lib-storage";
 import {
@@ -115,6 +115,26 @@ class AWSStorageClient implements IStorageClient {
             console.debug(`\tListing ${keyList.length} objects`, keyList);
             return keyList.filter((key) => suffix == null || key.endsWith(suffix));
         }
+    }
+
+    async checkObjectExists(key: string): Promise<boolean>{
+        const checkCommand = new HeadObjectCommand({
+            Bucket: this.bucketName,
+            Key: key
+        });
+
+        let checkResult = undefined;
+        try {
+            checkResult = await this.s3Client.send(checkCommand);            
+        } catch (error: any) {
+            console.error(`${error.name} Error while checking object existence: ${key}`, JSON.stringify(error));
+            const { httpStatusCode } = error.$metadata;
+        }
+
+        console.info(`Check result for key: ${key}`, JSON.stringify(checkResult));
+        return checkResult != undefined;
+
+        
     }
 
     async getObject(key: string): Promise<string | undefined> {
