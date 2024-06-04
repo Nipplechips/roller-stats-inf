@@ -33,3 +33,7 @@ module "api_gatewayv2" {
   depends_on = [module.userpool, module.lambda]
 
 }
+
+module "dynamodb"{
+  source = "./modules/dynamodb"
+}

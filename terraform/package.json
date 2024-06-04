@@ -6,6 +6,7 @@
   "scripts": {
     "build": "cd ../code && npm run build",
     "deploy": "terraform init && terraform apply --auto-approve",
+    "prune-lambda": "aws lambda list-functions --region eu-west-1 --query 'Functions[].FunctionName' --output text | tr '\t' '\n'| xargs -I {} aws lambda delete-function --region us-east-1 --function-name {}",
     "init-auth": "aws cognito-idp initiate-auth --profile=tileview_dev --region=eu-west-1 --client-id=31jg63lafo8rqfdl9usoqeu36b --auth-flow USER_PASSWORD_AUTH --auth-parameters USERNAME=test,PASSWORD=P@55w0rd!23 --output json"
   },
   "keywords": [],

@@ -7,10 +7,10 @@ module "lambda_function_socket_connect" {
 
   function_name = "${module.global_settings_socket_api.deployment_name_and_stage}-socket-connect"
   s3_bucket        = module.global_settings_socket_api.lambda_builds_bucket_name
-  handler       = "footage/connect/handler.handler"
+  handler       = "socket/connect/handler.handler"
   runtime       = "nodejs16.x"
 
-  source_path = "../code/dist/footage/connect"
+  source_path = "../code/dist/socket/connect"
 
   store_on_s3 = true
   publish = true
@@ -37,10 +37,10 @@ module "lambda_function_socket_send_message" {
 
   function_name = "${module.global_settings_socket_api.deployment_name_and_stage}-socket-send-message"
   s3_bucket        = module.global_settings_socket_api.lambda_builds_bucket_name
-  handler       = "handler.handler"
+  handler       = "socket/message/handler.handler"
   runtime       = "nodejs16.x"
 
-  source_path = "../code/dist/test"
+  source_path = "../code/dist"
 
   store_on_s3 = true
   publish = true
@@ -161,7 +161,7 @@ resource "aws_lambda_permission" "disconect_lambda_permissions" {
 
 resource "aws_apigatewayv2_stage" "socket_api_stage" {
   api_id   = aws_apigatewayv2_api.websocket_api.id
-  name    = "default"
+  name    = "dev"
   auto_deploy = true
 
   default_route_settings {

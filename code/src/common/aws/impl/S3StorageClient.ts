@@ -4,7 +4,7 @@ import { Upload } from "@aws-sdk/lib-storage";
 import {
     getSignedUrl,
     S3RequestPresigner,
-  } from "@aws-sdk/s3-request-presigner";
+} from "@aws-sdk/s3-request-presigner";
 
 class AWSStorageClient implements IStorageClient {
 
@@ -55,14 +55,16 @@ class AWSStorageClient implements IStorageClient {
         parallelUploads3.on("httpUploadProgress", (progress) => {
             console.log(progress);
         });
-        
+
         return parallelUploads3.done();
     }
 
 
     async getPresignedUrl(commandName: "upload" | "download", params: { Key: string }): Promise<string> {
-        const {Bucket, Key} = {Bucket: this.bucketName, Key: params.Key};
-        return getSignedUrl(this.s3Client, commandName == "upload" ? new PutObjectCommand({Bucket, Key}) : new GetObjectCommand({Bucket, Key}));
+        const { Bucket, Key } = { Bucket: this.bucketName, Key: params.Key };
+
+        //        return getSignedUrl(this.s3Client, commandName == "upload" ? new PutObjectCommand({Bucket, Key}) : new GetObjectCommand({Bucket, Key}));
+        return Promise.reject("Not Implemented");
     }
 
     async listKeys(prefix?: string, suffix?: string, keyList?: string[], pageToken?: string): Promise<string[]> {

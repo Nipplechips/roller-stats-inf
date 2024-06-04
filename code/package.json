@@ -12,7 +12,7 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts,.tsx ./code/src/",
     "build": "npx -p typescript tsc",
-    "postbuild": "shx cp package*.json dependencies/nodejs && cd ./dependencies/nodejs && npm i --omit=dev",
+    "postbuild": "shx cp -rf node_modules dependencies/nodejs",
     "localInvoke": ""
   },
   "author": "",
@@ -20,7 +20,9 @@
   "dependencies": {
     "@aws-sdk/client-apigatewaymanagementapi": "^3.583.0",
     "@aws-sdk/client-cognito-identity-provider": "^3.552.0",
+    "@aws-sdk/client-dynamodb": "^3.588.0",
     "@aws-sdk/client-s3": "^3.552.0",
+    "@aws-sdk/lib-dynamodb": "^3.588.0",
     "@aws-sdk/lib-storage": "^3.556.0",
     "@aws-sdk/s3-request-presigner": "^3.556.0",
     "jwt-decode": "^4.0.0",

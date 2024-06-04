@@ -19,8 +19,16 @@ variable "deployment_stage"{
     default="dev"
 }
 
+variable "dynamodb_chat_table_name" {
+  type = string
+  default = "chat-rooms"
+}
+
 # OUTPUT
 
+output "dynamodb_chat_table_name"{
+  value = "${var.deployment_name}-${var.deployment_stage}-${var.dynamodb_chat_table_name}"
+}
 output "lambda_builds_bucket_name"{
   value = "${var.deployment_name}-${var.deployment_stage}-lambda-builds"
 }
