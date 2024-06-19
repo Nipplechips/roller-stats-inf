@@ -10,6 +10,8 @@ module "dynamodb_table" {
   range_key                   = "sk"
   table_class                 = "STANDARD_INFREQUENT_ACCESS"
   deletion_protection_enabled = false
+  stream_enabled = true
+  stream_view_type = "NEW_AND_OLD_IMAGES"
 
   ttl_attribute_name = "ttl"
   ttl_enabled = true

@@ -11,21 +11,25 @@ module "s3_assets" {
 module "userpool" {
   source = "./modules/cognito"
 }
+module "dynamodb" {
+  source = "./modules/dynamodb"
+}
 
 module "lambda" {
   source                      = "./modules/lambda"
   code_deployment_bucket_name = module.s3_assets.code_bucket_name
   app_asset_bucket_name       = module.s3_assets.asset_bucket_name
   app_asset_bucket_arn        = module.s3_assets.asset_bucket_arn
+  db_table_name = module.dynamodb.table_name
+  table_stream_arn = module.dynamodb.table_stream_arn
 
   depends_on = [
-    module.s3_assets
+    module.s3_assets,
+    module.dynamodb
   ]
 }
 
-module "dynamodb" {
-  source = "./modules/dynamodb"
-}
+
 
 module "api_gatewayv2" {
   source = "./modules/api"
@@ -35,7 +39,7 @@ module "api_gatewayv2" {
   node_modules_layer_arn = module.lambda.node_modules_layer_arn
   db_table_name = module.dynamodb.table_name
   db_table_arn = module.dynamodb.table_arn
-  depends_on = [module.userpool, module.lambda]
+  depends_on = [module.userpool, module.lambda, module.dynamodb]
 
 }
 
